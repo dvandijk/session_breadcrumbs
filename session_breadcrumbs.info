@@ -1,0 +1,3 @@
+name = Session breadcrumbs
+description = This module shows the breadcrumbs like they were intended. It show what your last visited pages where instead of the site structure.
+core = 7.x

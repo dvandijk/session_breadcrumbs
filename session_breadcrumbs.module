@@ -1,0 +1,64 @@
+<?php
+
+/**
+ * @file
+ * Main file for the session_breadcrumb module.
+ */
+
+/**
+ * Implements hook_theme_registry_alter().
+ */
+function session_breadcrumbs_theme_registry_alter(&$theme_registry) {
+  $theme_registry['breadcrumb_original'] = $theme_registry['breadcrumb'];
+  $theme_registry['breadcrumb']['function'] = 'session_breadcrumbs_get_themed_breadcrumbs';
+}
+
+/**
+ * Generate the breadcrumbs
+ *
+ * @return array|boolean
+ */
+function session_breadcrumbs_get_breadcrumbs() {
+  $breadcrumbs = session_breadcrumbs_session_handler();
+  return array('breadcrumb' => $breadcrumbs);
+}
+
+/**
+ * Get themed breadcrumbs, which content may be overruled.
+ *
+ * @param array $original_breadcrumbs
+ * @return string
+ */
+function session_breadcrumbs_get_themed_breadcrumbs($original_breadcrumbs) {
+  $breadcrumbs = session_breadcrumbs_get_breadcrumbs();
+  if (is_array($breadcrumbs)) {
+    return theme('breadcrumb_original', $breadcrumbs);
+  }
+  return theme('breadcrumb_original', $original_breadcrumbs);
+}
+
+/**
+ * Handles the session breadcrumb array.
+ *
+ * @param int $limit
+ * @return array
+ */
+function session_breadcrumbs_session_handler($limit = 3) {
+  $session_count = count($_SESSION['breadcrumbs']);
+  if ($session_count > $limit) {
+    array_shift($_SESSION['breadcrumbs']);
+  }
+
+  if (drupal_is_front_page()) {
+    if (end($_SESSION['breadcrumbs']) != l(t('Home'), '<front>')) {
+      array_push($_SESSION['breadcrumbs'], l(t('Home'), '<front>'));
+    }
+  }
+  else {
+    if (end($_SESSION['breadcrumbs']) != l(drupal_get_title(), $_GET['q'])) {
+      array_push($_SESSION['breadcrumbs'], l(drupal_get_title(), $_GET['q']));
+    }
+  }
+
+  return $_SESSION['breadcrumbs'];
+}
